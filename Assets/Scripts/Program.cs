@@ -59,8 +59,13 @@ public class Program : MonoBehaviour
         }
 
         Texture2D tex = TestSprite.sprite.texture;
-        Texture2D newTex = new Texture2D(tex.width, tex.height, TextureFormat.ARGB32, false);
+        Texture2D newTex;
+
+        
+      
+        newTex = new Texture2D(tex.width, tex.height, TextureFormat.ARGB32, false);
         newTex.SetPixels32(colors);
+
         mDrawSprite.sprite = Sprite.Create(newTex, TestSprite.sprite.rect, new Vector2(0.5f, 0.5f));
 
         mDrawSprite.sprite.texture.filterMode = FilterMode.Point;
@@ -72,10 +77,14 @@ public class Program : MonoBehaviour
         //mPopulation = new Population(PopulationSize, true);
 
         mGenerationCount = 0;
-
-        FitnessCalculator.SetSolution(TestSprite.sprite.texture.GetPixels32());
+        
         MaxFitnessLabel.text = "Maximum fitness: " + FitnessCalculator.GetMaxFitness();
 
+    }
+
+    float getBrightness(Color32 color)
+    {
+        return (0.33f * color.r + 0.5f * color.g + 0.16f * color.b )/ 255f;
     }
 
     public bool EvolutionRunning()
@@ -84,9 +93,66 @@ public class Program : MonoBehaviour
     }
 
     public void StartEvolution()
-    {
+    { 
         if (mEvoCoroutine == null)
         {
+
+            var mDrawSpriteTest = Instantiate(TestSprite.gameObject).GetComponent<Image>();
+            mDrawSpriteTest.transform.position += Vector3.right * 1;
+
+
+            var colors = TestSprite.sprite.texture.GetPixels32();
+
+            for (int i = 0; i < colors.Length; i++)
+            {
+                colors[i] = Color.white;
+            }
+
+            Texture2D tex = TestSprite.sprite.texture;
+            Texture2D newTex;
+
+
+
+            newTex = new Texture2D(tex.width, tex.height, TextureFormat.ARGB32, false);
+            newTex.SetPixels32(colors);
+            var newTexTest = new Texture2D(tex.width, tex.height, TextureFormat.ARGB32, false);
+            newTexTest.SetPixels32(colors);
+
+            mDrawSprite.sprite = Sprite.Create(newTex, TestSprite.sprite.rect, new Vector2(0.5f, 0.5f));
+            mDrawSpriteTest.sprite = Sprite.Create(newTexTest, TestSprite.sprite.rect, new Vector2(0.5f, 0.5f));
+            
+
+            mDrawSprite.sprite.texture.filterMode = FilterMode.Point;
+
+            mDrawSprite.sprite.texture.Apply();
+
+            Individual.DefaultGeneLength = colors.Length;
+
+            //mPopulation = new Population(PopulationSize, true);
+
+            mGenerationCount = 0;
+
+            //Binary crossover method
+            if (crossoverDropdown.value == 4 )
+            {
+                Color32[] blackAndWhite = new Color32[colors.Length];
+                for (int i = 0; i < colors.Length; i++)
+                {
+                    blackAndWhite[i] = getBrightness(TestSprite.sprite.texture.GetPixels32()[i]) > 0.5f ? new Color32(255, 255, 255, 255) : new Color32(0, 0, 0, 255);
+                }
+                FitnessCalculator.SetSolution(blackAndWhite);
+                mDrawSpriteTest.sprite.texture.SetPixels32(blackAndWhite);
+                mDrawSpriteTest.sprite.texture.Apply();
+                mDrawSpriteTest.transform.SetParent(mDrawSprite.transform.parent);
+
+            }
+            else
+            {
+                FitnessCalculator.SetSolution(TestSprite.sprite.texture.GetPixels32());
+            }
+
+            MaxFitnessLabel.text = "Maximum fitness: " + FitnessCalculator.GetMaxFitness();
+
             mEvoCoroutine = StartCoroutine(Evolution());
         }
     }

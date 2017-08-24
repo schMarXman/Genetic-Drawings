@@ -64,6 +64,8 @@ public class GeneticAlgorithm
             case 3:
                 // Shuffle
                 break;
+            case 4:
+                return RandomRespectfulCrossover(indiv1, indiv2);
         }
 
         return null;
@@ -90,7 +92,7 @@ public class GeneticAlgorithm
     private static Individual OnepointCrossover(Individual indiv1, Individual indiv2)
     {
         Individual newSol = new Individual();
-        int crossoverpoint = UnityEngine.Random.Range(0,indiv1.GetSize()-1));
+        int crossoverpoint = UnityEngine.Random.Range(0,indiv1.GetSize()-1);
 
         for (int i = 0; i < indiv1.GetSize(); i++)
         {   // Crossover 1-Point            
@@ -103,8 +105,8 @@ public class GeneticAlgorithm
     private static Individual TwopointCrossover(Individual indiv1, Individual indiv2)
     {
         Individual newSol = new Individual();
-        int crossoverpoint1 = UnityEngine.Random.Range(0,indiv1.GetSize()-1));
-        int crossoverpoint2 = UnityEngine.Random.Range(0,indiv1.GetSize()-1));
+        int crossoverpoint1 = UnityEngine.Random.Range(0,indiv1.GetSize()-1);
+        int crossoverpoint2 = UnityEngine.Random.Range(0,indiv1.GetSize()-1);
 
         for (int i = 0; i < indiv1.GetSize(); i++)
         {   // Crossover 2-Point
@@ -118,6 +120,34 @@ public class GeneticAlgorithm
                 else if(i>crossoverpoint2) newSol.SetGene(i, indiv1.GetGene(i));
         }
         return newSol;
+    }
+
+    private static Individual RandomRespectfulCrossover(Individual indiv1, Individual indiv2)
+    {
+        Individual child = new Individual();
+        //Without creating similarity vector
+        for (int i = 0; i < indiv1.GetSize(); i++)
+        {
+            Color32 gene1 = indiv1.GetGene(i);
+
+            if (gene1.Equals(indiv2.GetGene(i)))
+            {
+                if (gene1.Equals(new Color32(255, 255, 255, 255)))
+                {
+                    child.SetGene(i, new Color32(255, 255, 255, 255));
+                }
+                else
+                {
+                    child.SetGene(i, new Color32(0, 0, 0, 255));
+                }
+            }
+            else
+            {
+                child.SetGene(i, Random.value > 0.5f ? new Color32(255, 255, 255, 255) : new Color32(0, 0, 0, 255));
+            }
+        }
+
+        return child;
     }
 
     private static void Mutate(Individual indiv)
@@ -144,4 +174,6 @@ public class GeneticAlgorithm
         Individual fittest = tournament.GetFittest();
         return fittest;
     }
+
+    
 }
