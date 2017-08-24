@@ -16,7 +16,7 @@ public class Program : MonoBehaviour
     //private SpriteRenderer mDrawSprite;
     public Image mDrawSprite;
 
-    public Dropdown crossoverDropdown;
+    public Dropdown crossoverDropdown, selectionDropdown;
 
     private Population mPopulation;
 

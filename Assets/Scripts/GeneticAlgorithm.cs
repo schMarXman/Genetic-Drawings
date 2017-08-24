@@ -13,7 +13,7 @@ public class GeneticAlgorithm
     public static int TournamentSize = 5;
     public static bool Elitism = true;
 
-    public static Population EvolvePopulation(Population pop, int crossover)
+    public static Population EvolvePopulation(Population pop, int selection, int crossover)
     {
         Population newPopulation = new Population(pop.GetSize(), false);
 
@@ -34,8 +34,8 @@ public class GeneticAlgorithm
 
         for (int i = elitismOffset; i < pop.GetSize(); i++)
         {
-            Individual indiv1 = SelectViaTournament(pop);
-            Individual indiv2 = SelectViaTournament(pop);
+            Individual indiv1 = Select(pop, selection);
+            Individual indiv2 = Select(pop, selection);
             Individual newIndiv = Crossover(indiv1, indiv2, crossover);
             newPopulation.SaveIndividual(i, newIndiv);
         }
@@ -57,16 +57,14 @@ public class GeneticAlgorithm
                 return UniformCrossover(indiv1, indiv2);
             case 1:
                 // OnePoint
-                break;
+                return null;
             case 2:
                 // TwoPoint
-                break;
+                return null;
             case 3:
                 // Shuffle
-                break;
+                return null;
         }
-
-        return null;
     }
 
     private static Individual UniformCrossover(Individual indiv1, Individual indiv2)
@@ -99,7 +97,24 @@ public class GeneticAlgorithm
         }
     }
 
-    private static Individual SelectViaTournament(Population pop)
+    private static Individual Select(Population pop, int selection)
+    {
+        switch (selection)
+        {
+            default:
+            case 0:
+                // tournament
+                return SelectViaTodurnament(pop);
+            case 1:
+                // 
+                return null;
+            case 2:
+                //
+                return null;
+        }
+    }
+
+    private static Individual SelectViaTodurnament(Population pop)
     {
         Population tournament = new Population(TournamentSize, false);
         for (int i = 0; i < TournamentSize; i++)
