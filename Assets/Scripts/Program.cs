@@ -40,6 +40,8 @@ public class Program : MonoBehaviour
 
     private bool mEvoFinished;
 
+    private int mPreviousCrossoverMode;
+
     void Awake()
     {
         Instance = this;
@@ -106,38 +108,45 @@ public class Program : MonoBehaviour
                 mEvoFinished = false;
             }
 
-            var colors = TestSprite.sprite.texture.GetPixels32();
+            //var colors = TestSprite.sprite.texture.GetPixels32();
 
-            for (int i = 0; i < colors.Length; i++)
-            {
-                colors[i] = Color.white;
-            }
+            //for (int i = 0; i < colors.Length; i++)
+            //{
+            //    colors[i] = Color.white;
+            //}
 
-            Texture2D tex = TestSprite.sprite.texture;
-            Texture2D newTex;
+            //Texture2D tex = TestSprite.sprite.texture;
+            //Texture2D newTex;
 
 
 
-            newTex = new Texture2D(tex.width, tex.height, TextureFormat.ARGB32, false);
-            newTex.SetPixels32(colors);
-            var newTexTest = new Texture2D(tex.width, tex.height, TextureFormat.ARGB32, false);
-            newTexTest.SetPixels32(colors);
+            //newTex = new Texture2D(tex.width, tex.height, TextureFormat.ARGB32, false);
+            //newTex.SetPixels32(colors);
+            //var newTexTest = new Texture2D(tex.width, tex.height, TextureFormat.ARGB32, false);
+            //newTexTest.SetPixels32(colors);
 
-            mDrawSprite.sprite = Sprite.Create(newTex, TestSprite.sprite.rect, new Vector2(0.5f, 0.5f));            
+            //mDrawSprite.sprite = Sprite.Create(newTex, TestSprite.sprite.rect, new Vector2(0.5f, 0.5f));            
 
-            mDrawSprite.sprite.texture.filterMode = FilterMode.Point;
+            //mDrawSprite.sprite.texture.filterMode = FilterMode.Point;
 
-            mDrawSprite.sprite.texture.Apply();
+            //mDrawSprite.sprite.texture.Apply();
 
-            Individual.DefaultGeneLength = colors.Length;
+            //Individual.DefaultGeneLength = colors.Length;
 
-            //mPopulation = new Population(PopulationSize, true);
+            ////mPopulation = new Population(PopulationSize, true);
 
-            mGenerationCount = 0;
+            //mGenerationCount = 0;
 
             //Binary crossover method
             if (crossoverDropdown.value == 3 )
             {
+                if (mPreviousCrossoverMode != 3)
+                {     
+                    Reset();
+                }
+
+                var colors = TestSprite.sprite.texture.GetPixels32();
+
                 Color32[] blackAndWhite = new Color32[colors.Length];
                 for (int i = 0; i < colors.Length; i++)
                 {
@@ -148,8 +157,15 @@ public class Program : MonoBehaviour
             }
             else
             {
+                if (mPreviousCrossoverMode == 3)
+                {
+                    Reset();
+                }
+
                 FitnessCalculator.SetSolution(TestSprite.sprite.texture.GetPixels32());
             }
+
+            mPreviousCrossoverMode = crossoverDropdown.value;
 
             MaxFitnessLabel.text = "Maximum fitness: " + FitnessCalculator.GetMaxFitness();
 
