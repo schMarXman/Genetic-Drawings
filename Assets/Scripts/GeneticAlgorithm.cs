@@ -119,30 +119,28 @@ public class GeneticAlgorithm
         return newSol;
     }
 
-    private static Individual FLatCrossover(Individual indiv1, Individual indiv2)
+    private static Individual kpointCrossover(Individual indiv1, Individual indiv2,int k)
     {
-        Individual newSol = new Individual();        
-        for (int i = 0; i < indiv1.GetSize(); i++)
-        {
-            // Flat crossover
-            float h1, h2 = 0;
-            float junk;
-            Color.RGBToHSV(indiv1.GetGene(i), out junk, out junk, out h1);
-            Color.RGBToHSV(indiv2.GetGene(i), out junk, out junk, out h2);
+        int points[]= new int[k-1];
+        Individual newSol = new Individual();
+        for (int j = 0; j < k;j++){
+            points[j]= UnityEngine.Random.Range(0, indiv1.GetSize() - 1);
+        }
+        points.OrderBy(x => x);        
 
-            if (UnityEngine.Random.value <= UniformRate)
-            {
-                if (h1 < h2)
-                    newSol.SetGene(i, indiv1.GetGene(i));
-                else
-                    newSol.SetGene(i, indiv2.GetGene(i));
+        for (int i = 0; i < indiv1.GetSize(); i++)
+        {   // Crossover k-Point          
+            for(int j = 0; j < k; j++){
+                if(j == k-1){
+                    if(i < points[j]){
+                        if(i%2 == 0) newSol.SetGene(i, indiv1.GetGene(i));
+                            else newSol.SetGene(i, indiv2.GetGene(i));
+                    }
+                }else if(i < points[j] && i < points[j+1]){
+                    if(i%2 == 0) newSol.SetGene(i, indiv1.GetGene(i));
+                        else newSol.SetGene(i, indiv2.GetGene(i));
+                }                 
             }
-            else { 
-                if (h1 > h2)
-                    newSol.SetGene(i, indiv1.GetGene(i));
-                else
-                    newSol.SetGene(i, indiv2.GetGene(i));
-            }            
         }
         return newSol;
     }
