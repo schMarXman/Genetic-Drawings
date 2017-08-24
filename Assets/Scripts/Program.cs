@@ -38,6 +38,8 @@ public class Program : MonoBehaviour
 
     private List<GameObject> mPopulationPrefabs = new List<GameObject>();
 
+    private bool mEvoFinished;
+
     void Awake()
     {
         Instance = this;
@@ -98,10 +100,11 @@ public class Program : MonoBehaviour
     { 
         if (mEvoCoroutine == null)
         {
-
-            var mDrawSpriteTest = Instantiate(TestSprite.gameObject).GetComponent<Image>();
-            mDrawSpriteTest.transform.position += Vector3.right * 1;
-
+            if (mEvoFinished)
+            {
+                Reset();
+                mEvoFinished = false;
+            }
 
             var colors = TestSprite.sprite.texture.GetPixels32();
 
@@ -120,9 +123,7 @@ public class Program : MonoBehaviour
             var newTexTest = new Texture2D(tex.width, tex.height, TextureFormat.ARGB32, false);
             newTexTest.SetPixels32(colors);
 
-            mDrawSprite.sprite = Sprite.Create(newTex, TestSprite.sprite.rect, new Vector2(0.5f, 0.5f));
-            mDrawSpriteTest.sprite = Sprite.Create(newTexTest, TestSprite.sprite.rect, new Vector2(0.5f, 0.5f));
-            
+            mDrawSprite.sprite = Sprite.Create(newTex, TestSprite.sprite.rect, new Vector2(0.5f, 0.5f));            
 
             mDrawSprite.sprite.texture.filterMode = FilterMode.Point;
 
@@ -143,9 +144,6 @@ public class Program : MonoBehaviour
                     blackAndWhite[i] = getBrightness(TestSprite.sprite.texture.GetPixels32()[i]) > 0.5f ? new Color32(255, 255, 255, 255) : new Color32(0, 0, 0, 255);
                 }
                 FitnessCalculator.SetSolution(blackAndWhite);
-                mDrawSpriteTest.sprite.texture.SetPixels32(blackAndWhite);
-                mDrawSpriteTest.sprite.texture.Apply();
-                mDrawSpriteTest.transform.SetParent(mDrawSprite.transform.parent);
 
             }
             else
@@ -347,6 +345,8 @@ public class Program : MonoBehaviour
             mPopulation = new Population(PopulationSize, true);
         }
 
+        int fitness = 0;
+
         while (mPopulation.GetFittest().GetFitness() < FitnessCalculator.GetMaxFitness())
         {
             mGenerationCount++;
@@ -354,7 +354,7 @@ public class Program : MonoBehaviour
             //if (mGenerationCount % 100 == 0)
             //{
             var fittest = mPopulation.GetFittest();
-            var fitness = fittest.GetFitness();
+            fitness = fittest.GetFitness();
             Debug.Log("Generation: " + mGenerationCount + " Fittest: " + fitness);
 
             CurrentFitnessLabel.text = "Fitness: " + fitness;
@@ -369,10 +369,20 @@ public class Program : MonoBehaviour
             yield return null;
         }
 
+        var finalFittest = mPopulation.GetFittest();
+
+        SetColors(finalFittest.GetGenes());
+
+        CurrentFitnessLabel.text = "Fitness: " + finalFittest.GetFitness();
+        GenerationLabel.text = "Generation: " + mGenerationCount;
+
         Debug.Log("Solution found!");
         Debug.Log("Generation: " + mGenerationCount);
         Debug.Log("Genes:");
         Debug.Log(mPopulation.GetFittest());
+
+        mEvoCoroutine = null;
+        mEvoFinished = true;
     }
 
     // test
