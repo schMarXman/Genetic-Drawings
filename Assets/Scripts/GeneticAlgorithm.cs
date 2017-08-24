@@ -57,10 +57,10 @@ public class GeneticAlgorithm
                 return UniformCrossover(indiv1, indiv2);
             case 1:
                 // OnePoint
-                return null;
+                return OnepointCrossover(indiv1, indiv2;
             case 2:
                 // TwoPoint
-                return null;
+                return TwopointCrossover(indiv1, indiv2);
             case 3:
                 // Shuffle
                 return null;
@@ -88,7 +88,7 @@ public class GeneticAlgorithm
     private static Individual OnepointCrossover(Individual indiv1, Individual indiv2)
     {
         Individual newSol = new Individual();
-        int crossoverpoint = UnityEngine.Random.Range(0,indiv1.GetSize()-1));
+        int crossoverpoint = UnityEngine.Random.Range(0,indiv1.GetSize()-1);
 
         for (int i = 0; i < indiv1.GetSize(); i++)
         {   // Crossover 1-Point            
@@ -101,8 +101,8 @@ public class GeneticAlgorithm
     private static Individual TwopointCrossover(Individual indiv1, Individual indiv2)
     {
         Individual newSol = new Individual();
-        int crossoverpoint1 = UnityEngine.Random.Range(0,indiv1.GetSize()-1));
-        int crossoverpoint2 = UnityEngine.Random.Range(0,indiv1.GetSize()-1));
+        int crossoverpoint1 = UnityEngine.Random.Range(0,indiv1.GetSize()-1);
+        int crossoverpoint2 = UnityEngine.Random.Range(0,indiv1.GetSize()-1);
 
         for (int i = 0; i < indiv1.GetSize(); i++)
         {   // Crossover 2-Point
