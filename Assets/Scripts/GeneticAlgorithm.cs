@@ -62,7 +62,7 @@ public class GeneticAlgorithm
                 return OnepointCrossover(indiv1, indiv2);
             case 2:
                 // KPoint
-                return kpointCrossover(indiv1, indiv2, K);
+                return KPointCrossover(indiv1, indiv2, K);
             case 3:
                 return RandomRespectfulCrossover(indiv1, indiv2);
 
@@ -126,36 +126,69 @@ public class GeneticAlgorithm
         return newSol;
     }
 
-    private static Individual kpointCrossover(Individual indiv1, Individual indiv2, int k)
+    //private static Individual kpointCrossover(Individual indiv1, Individual indiv2, int k)
+    //{
+    //    int[] points = new int[k];
+    //    Individual newSol = new Individual();
+    //    for (int j = 0; j < k; j++)
+    //    {
+    //        points[j] = UnityEngine.Random.Range(0, indiv1.GetSize() - 1);
+    //    }
+    //    points = points.OrderBy(x => x).ToArray();
+
+    //    for (int i = 0; i < indiv1.GetSize(); i++)
+    //    {   // Crossover k-Point          
+    //        for (int j = 0; j < k; j++)
+    //        {
+    //            if (j == k - 1)
+    //            {
+    //                if (i < points[j])
+    //                {
+    //                    if (i % 2 == 0) newSol.SetGene(i, indiv1.GetGene(i));
+    //                    else newSol.SetGene(i, indiv2.GetGene(i));
+    //                }
+    //            }
+    //            else if (i < points[j] && i < points[j + 1])
+    //            {
+    //                if (i % 2 == 0) newSol.SetGene(i, indiv1.GetGene(i));
+    //                else newSol.SetGene(i, indiv2.GetGene(i));
+    //            }
+    //        }
+    //    }
+    //    return newSol;
+    //}
+
+    private static Individual KPointCrossover(Individual indiv1, Individual indiv2, int k)
     {
-        int[] points = new int[k];
-        Individual newSol = new Individual();
-        for (int j = 0; j < k; j++)
+        Individual newIndiv = new Individual();
+
+        List<int> crossoverPoints = new List<int>();
+
+        for (int i = 0; i <= k; i++)
         {
-            points[j] = UnityEngine.Random.Range(0, indiv1.GetSize() - 1);
+            crossoverPoints.Add(Random.Range(0, indiv1.GetSize() - 1));
         }
-        points = points.OrderBy(x => x).ToArray();
+
+        Individual currentlySelectedIndiv = indiv1;
 
         for (int i = 0; i < indiv1.GetSize(); i++)
-        {   // Crossover k-Point          
-            for (int j = 0; j < k; j++)
+        {
+            newIndiv.SetGene(i, currentlySelectedIndiv.GetGene(i));
+
+            if (crossoverPoints.Contains(i))
             {
-                if (j == k - 1)
+                if (currentlySelectedIndiv == indiv1)
                 {
-                    if (i < points[j])
-                    {
-                        if (i % 2 == 0) newSol.SetGene(i, indiv1.GetGene(i));
-                        else newSol.SetGene(i, indiv2.GetGene(i));
-                    }
+                    currentlySelectedIndiv = indiv2;
                 }
-                else if (i < points[j] && i < points[j + 1])
+                else if (currentlySelectedIndiv == indiv2)
                 {
-                    if (i % 2 == 0) newSol.SetGene(i, indiv1.GetGene(i));
-                    else newSol.SetGene(i, indiv2.GetGene(i));
+                    currentlySelectedIndiv = indiv1;
                 }
             }
         }
-        return newSol;
+
+        return newIndiv;
     }
 
     private static Individual RandomRespectfulCrossover(Individual indiv1, Individual indiv2)
