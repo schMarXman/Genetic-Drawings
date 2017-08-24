@@ -1,5 +1,7 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Text;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -216,9 +218,11 @@ public class Program : MonoBehaviour
 
     public void TestSuite()
     {
-        for (int steps = 1; steps < 5; steps++)
+
+        for (int steps = 1; steps < 3; steps++)
         {
             GenStepSize = 500 * steps;
+            StringBuilder str = new StringBuilder();
             // selections
             for (int i = 0; i < 3; i++)
             {
@@ -226,15 +230,26 @@ public class Program : MonoBehaviour
                 // crossover
                 for (int j = 0; j < 5; j++)
                 {
-                    crossoverDropdown.value = j;
-                    Reset();
-                    StepForward();
-                    int fitness = mPopulation.GetFittest().GetFitness();
-                    Debug.Log(i.ToString() + " " + j.ToString() + " " + fitness.ToString());
+                    int avg = 0;
+
+                    for (int av = 0; av < 3; av++)
+                    {
+                        crossoverDropdown.value = j;
+                        Reset();
+                        StepForward();
+                        avg += mPopulation.GetFittest().GetFitness();
+                    }
+
+                    avg /= 3;
+
+                    str.Append((500*steps).ToString() + " " + i.ToString() + " " + j.ToString() + " " + avg.ToString());
+                    str.Append(Environment.NewLine);
                     var img = mDrawSprite.sprite.texture.EncodeToPNG();
                     System.IO.File.WriteAllBytes("C:\\tmp\\" + i.ToString() + "." + j.ToString() + "." + (500 * steps).ToString() + ".png", img);
                 }
             }
+
+            System.IO.File.WriteAllText("C:\\temp\\" + (500 * steps).ToString() + ".txt", str.ToString());
         }
     }
 
