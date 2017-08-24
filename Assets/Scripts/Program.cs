@@ -16,6 +16,8 @@ public class Program : MonoBehaviour
     //private SpriteRenderer mDrawSprite;
     public Image mDrawSprite;
 
+    public Dropdown crossoverDropdown;
+
     private Population mPopulation;
 
     private int mGenerationCount = 0;
@@ -60,6 +62,8 @@ public class Program : MonoBehaviour
         Texture2D newTex = new Texture2D(tex.width, tex.height, TextureFormat.ARGB32, false);
         newTex.SetPixels32(colors);
         mDrawSprite.sprite = Sprite.Create(newTex, TestSprite.sprite.rect, new Vector2(0.5f, 0.5f));
+
+        mDrawSprite.sprite.texture.filterMode = FilterMode.Point;
 
         mDrawSprite.sprite.texture.Apply();
 
@@ -109,7 +113,7 @@ public class Program : MonoBehaviour
 
             for (int i = 0; i < GenStepSize; i++)
             {
-                mPopulation = GeneticAlgorithm.EvolvePopulation(mPopulation);
+                mPopulation = GeneticAlgorithm.EvolvePopulation(mPopulation, crossoverDropdown.value);
             }
 
             mGenerationCount += GenStepSize;
@@ -151,6 +155,7 @@ public class Program : MonoBehaviour
                 text.text = "#" + (i + 1) + " F: " + indi.GetFitness();
 
                 image.sprite.texture.SetPixels32(indi.GetGenes());
+                image.sprite.texture.filterMode = FilterMode.Point;
                 image.sprite.texture.Apply();
 
                 mPopulationPrefabs.Add(image.gameObject);
@@ -234,7 +239,7 @@ public class Program : MonoBehaviour
             CurrentFitnessLabel.text = "Fitness: " + fitness;
             GenerationLabel.text = "Generation: " + mGenerationCount;
 
-            mPopulation = GeneticAlgorithm.EvolvePopulation(mPopulation);
+            mPopulation = GeneticAlgorithm.EvolvePopulation(mPopulation, crossoverDropdown.value);
 
             SetColors(fittest.GetGenes());
             //}

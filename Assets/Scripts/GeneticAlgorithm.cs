@@ -13,7 +13,7 @@ public class GeneticAlgorithm
     public static int TournamentSize = 5;
     public static bool Elitism = true;
 
-    public static Population EvolvePopulation(Population pop)
+    public static Population EvolvePopulation(Population pop, int crossover)
     {
         Population newPopulation = new Population(pop.GetSize(), false);
 
@@ -36,7 +36,7 @@ public class GeneticAlgorithm
         {
             Individual indiv1 = SelectViaTournament(pop);
             Individual indiv2 = SelectViaTournament(pop);
-            Individual newIndiv = Crossover(indiv1, indiv2);
+            Individual newIndiv = Crossover(indiv1, indiv2, crossover);
             newPopulation.SaveIndividual(i, newIndiv);
         }
 
@@ -48,7 +48,28 @@ public class GeneticAlgorithm
         return newPopulation;
     }
 
-    private static Individual uniformCrossover(Individual indiv1, Individual indiv2)
+    private static Individual Crossover(Individual indiv1, Individual indiv2, int crossover)
+    {
+        switch (crossover)
+        {
+            default:
+            case 0:
+                return UniformCrossover(indiv1, indiv2);
+            case 1:
+                // OnePoint
+                break;
+            case 2:
+                // TwoPoint
+                break;
+            case 3:
+                // Shuffle
+                break;
+        }
+
+        return null;
+    }
+
+    private static Individual UniformCrossover(Individual indiv1, Individual indiv2)
     {
         Individual newSol = new Individual();        
         for (int i = 0; i < indiv1.GetSize(); i++)
@@ -66,7 +87,7 @@ public class GeneticAlgorithm
         return newSol;
     }
 
-    private static Individual onepointCrossover(Individual indiv1, Individual indiv2)
+    private static Individual OnepointCrossover(Individual indiv1, Individual indiv2)
     {
         Individual newSol = new Individual();
         int crossoverpoint = int(random(indiv1.GetSize()));
@@ -79,7 +100,7 @@ public class GeneticAlgorithm
         return newSol;
     }
 
-    private static Individual twopointCrossover(Individual indiv1, Individual indiv2)
+    private static Individual TwopointCrossover(Individual indiv1, Individual indiv2)
     {
         Individual newSol = new Individual();
         int crossoverpoint1 = int(random(indiv1.GetSize()));
