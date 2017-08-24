@@ -314,7 +314,7 @@ public class Program : MonoBehaviour
 
         for (int i = 0; i < 200; i++)
         {
-            colors[Random.Range(0, colors.Length - 1)] = Color.black;
+            colors[UnityEngine.Random.Range(0, colors.Length - 1)] = Color.black;
         }
 
         mDrawSprite.sprite.texture.SetPixels32(colors);
