@@ -223,6 +223,8 @@ public class Program : MonoBehaviour
             FitnessCalculator.SetSolution(TestSprite.sprite.texture.GetPixels32());
             mPopulation = null;
 
+            mDrawSprite.sprite.texture.filterMode = FilterMode.Point;
+
             mGenerationCount = 0;
 
             CurrentFitnessLabel.text = "Fitness: ";
