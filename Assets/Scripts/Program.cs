@@ -128,6 +128,11 @@ public class Program : MonoBehaviour
         }
     }
 
+    public void ShowCurrentPopulation(int amount)
+    {
+        ShowPopulation(mPopulation, PopulationDisplayAmount);
+    }
+
     public void ShowPopulation(Population pop, int amount)
     {
         if (UIController.Instance.PopulationView.activeSelf && pop != null)
@@ -165,8 +170,11 @@ public class Program : MonoBehaviour
 
     public void ShowOrderedPopulation()
     {
-        var orderedPop = mPopulation.OrderByFitness();
-        ShowPopulation(orderedPop, PopulationDisplayAmount);
+        if (mPopulation != null)
+        {
+            var orderedPop = mPopulation.OrderByFitness(true);
+            ShowPopulation(orderedPop, PopulationDisplayAmount);
+        }
     }
 
     public void SelectSourceImage(Image image)
