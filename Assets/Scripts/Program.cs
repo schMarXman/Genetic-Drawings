@@ -1,5 +1,7 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Text;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -59,8 +61,13 @@ public class Program : MonoBehaviour
         }
 
         Texture2D tex = TestSprite.sprite.texture;
-        Texture2D newTex = new Texture2D(tex.width, tex.height, TextureFormat.ARGB32, false);
+        Texture2D newTex;
+
+        
+      
+        newTex = new Texture2D(tex.width, tex.height, TextureFormat.ARGB32, false);
         newTex.SetPixels32(colors);
+
         mDrawSprite.sprite = Sprite.Create(newTex, TestSprite.sprite.rect, new Vector2(0.5f, 0.5f));
 
         mDrawSprite.sprite.texture.filterMode = FilterMode.Point;
@@ -72,10 +79,14 @@ public class Program : MonoBehaviour
         //mPopulation = new Population(PopulationSize, true);
 
         mGenerationCount = 0;
-
-        FitnessCalculator.SetSolution(TestSprite.sprite.texture.GetPixels32());
+        
         MaxFitnessLabel.text = "Maximum fitness: " + FitnessCalculator.GetMaxFitness();
 
+    }
+
+    float getBrightness(Color32 color)
+    {
+        return (0.33f * color.r + 0.5f * color.g + 0.16f * color.b )/ 255f;
     }
 
     public bool EvolutionRunning()
@@ -84,9 +95,66 @@ public class Program : MonoBehaviour
     }
 
     public void StartEvolution()
-    {
+    { 
         if (mEvoCoroutine == null)
         {
+
+            var mDrawSpriteTest = Instantiate(TestSprite.gameObject).GetComponent<Image>();
+            mDrawSpriteTest.transform.position += Vector3.right * 1;
+
+
+            var colors = TestSprite.sprite.texture.GetPixels32();
+
+            for (int i = 0; i < colors.Length; i++)
+            {
+                colors[i] = Color.white;
+            }
+
+            Texture2D tex = TestSprite.sprite.texture;
+            Texture2D newTex;
+
+
+
+            newTex = new Texture2D(tex.width, tex.height, TextureFormat.ARGB32, false);
+            newTex.SetPixels32(colors);
+            var newTexTest = new Texture2D(tex.width, tex.height, TextureFormat.ARGB32, false);
+            newTexTest.SetPixels32(colors);
+
+            mDrawSprite.sprite = Sprite.Create(newTex, TestSprite.sprite.rect, new Vector2(0.5f, 0.5f));
+            mDrawSpriteTest.sprite = Sprite.Create(newTexTest, TestSprite.sprite.rect, new Vector2(0.5f, 0.5f));
+            
+
+            mDrawSprite.sprite.texture.filterMode = FilterMode.Point;
+
+            mDrawSprite.sprite.texture.Apply();
+
+            Individual.DefaultGeneLength = colors.Length;
+
+            //mPopulation = new Population(PopulationSize, true);
+
+            mGenerationCount = 0;
+
+            //Binary crossover method
+            if (crossoverDropdown.value == 3 )
+            {
+                Color32[] blackAndWhite = new Color32[colors.Length];
+                for (int i = 0; i < colors.Length; i++)
+                {
+                    blackAndWhite[i] = getBrightness(TestSprite.sprite.texture.GetPixels32()[i]) > 0.5f ? new Color32(255, 255, 255, 255) : new Color32(0, 0, 0, 255);
+                }
+                FitnessCalculator.SetSolution(blackAndWhite);
+                mDrawSpriteTest.sprite.texture.SetPixels32(blackAndWhite);
+                mDrawSpriteTest.sprite.texture.Apply();
+                mDrawSpriteTest.transform.SetParent(mDrawSprite.transform.parent);
+
+            }
+            else
+            {
+                FitnessCalculator.SetSolution(TestSprite.sprite.texture.GetPixels32());
+            }
+
+            MaxFitnessLabel.text = "Maximum fitness: " + FitnessCalculator.GetMaxFitness();
+
             mEvoCoroutine = StartCoroutine(Evolution());
         }
     }
@@ -128,6 +196,11 @@ public class Program : MonoBehaviour
         }
     }
 
+    public void ShowCurrentPopulation(int amount)
+    {
+        ShowPopulation(mPopulation, PopulationDisplayAmount);
+    }
+
     public void ShowPopulation(Population pop, int amount)
     {
         if (UIController.Instance.PopulationView.activeSelf && pop != null)
@@ -165,8 +238,11 @@ public class Program : MonoBehaviour
 
     public void ShowOrderedPopulation()
     {
-        var orderedPop = mPopulation.OrderByFitness();
-        ShowPopulation(orderedPop, PopulationDisplayAmount);
+        if (mPopulation != null)
+        {
+            var orderedPop = mPopulation.OrderByFitness(true);
+            ShowPopulation(orderedPop, PopulationDisplayAmount);
+        }
     }
 
     public void SelectSourceImage(Image image)
@@ -213,6 +289,8 @@ public class Program : MonoBehaviour
             FitnessCalculator.SetSolution(TestSprite.sprite.texture.GetPixels32());
             mPopulation = null;
 
+            mDrawSprite.sprite.texture.filterMode = FilterMode.Point;
+
             mGenerationCount = 0;
 
             CurrentFitnessLabel.text = "Fitness: ";
@@ -222,9 +300,11 @@ public class Program : MonoBehaviour
 
     public void TestSuite()
     {
-        for (int steps = 1; steps < 5; steps++)
+
+        for (int steps = 1; steps < 3; steps++)
         {
             GenStepSize = 500 * steps;
+            StringBuilder str = new StringBuilder();
             // selections
             for (int i = 0; i < 3; i++)
             {
@@ -232,15 +312,26 @@ public class Program : MonoBehaviour
                 // crossover
                 for (int j = 0; j < 5; j++)
                 {
-                    crossoverDropdown.value = j;
-                    Reset();
-                    StepForward();
-                    int fitness = mPopulation.GetFittest().GetFitness();
-                    Debug.Log(i.ToString() + " " + j.ToString() + " " + fitness.ToString());
+                    int avg = 0;
+
+                    for (int av = 0; av < 3; av++)
+                    {
+                        crossoverDropdown.value = j;
+                        Reset();
+                        StepForward();
+                        avg += mPopulation.GetFittest().GetFitness();
+                    }
+
+                    avg /= 3;
+
+                    str.Append((500*steps).ToString() + " " + i.ToString() + " " + j.ToString() + " " + avg.ToString());
+                    str.Append(Environment.NewLine);
                     var img = mDrawSprite.sprite.texture.EncodeToPNG();
                     System.IO.File.WriteAllBytes("C:\\tmp\\" + i.ToString() + "." + j.ToString() + "." + (500 * steps).ToString() + ".png", img);
                 }
             }
+
+            System.IO.File.WriteAllText("C:\\temp\\" + (500 * steps).ToString() + ".txt", str.ToString());
         }
     }
 
@@ -291,7 +382,7 @@ public class Program : MonoBehaviour
 
         for (int i = 0; i < 200; i++)
         {
-            colors[Random.Range(0, colors.Length - 1)] = Color.black;
+            colors[UnityEngine.Random.Range(0, colors.Length - 1)] = Color.black;
         }
 
         mDrawSprite.sprite.texture.SetPixels32(colors);
