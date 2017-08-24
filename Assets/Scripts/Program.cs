@@ -113,7 +113,7 @@ public class Program : MonoBehaviour
 
             for (int i = 0; i < GenStepSize; i++)
             {
-                mPopulation = GeneticAlgorithm.EvolvePopulation(mPopulation, crossoverDropdown.value);
+                mPopulation = GeneticAlgorithm.EvolvePopulation(mPopulation, selectionDropdown.value, crossoverDropdown.value);
             }
 
             mGenerationCount += GenStepSize;
@@ -239,7 +239,7 @@ public class Program : MonoBehaviour
             CurrentFitnessLabel.text = "Fitness: " + fitness;
             GenerationLabel.text = "Generation: " + mGenerationCount;
 
-            mPopulation = GeneticAlgorithm.EvolvePopulation(mPopulation, crossoverDropdown.value);
+            mPopulation = GeneticAlgorithm.EvolvePopulation(mPopulation, selectionDropdown.value, crossoverDropdown.value);
 
             SetColors(fittest.GetGenes());
             //}
