@@ -220,6 +220,30 @@ public class Program : MonoBehaviour
         }
     }
 
+    public void TestSuite()
+    {
+        for (int steps = 1; steps < 5; steps++)
+        {
+            GenStepSize = 500 * steps;
+            // selections
+            for (int i = 0; i < 3; i++)
+            {
+                selectionDropdown.value = i;
+                // crossover
+                for (int j = 0; j < 5; j++)
+                {
+                    crossoverDropdown.value = j;
+                    Reset();
+                    StepForward();
+                    int fitness = mPopulation.GetFittest().GetFitness();
+                    Debug.Log(i.ToString() + " " + j.ToString() + " " + fitness.ToString());
+                    var img = mDrawSprite.sprite.texture.EncodeToPNG();
+                    System.IO.File.WriteAllBytes("C:\\tmp\\" + i.ToString() + "." + j.ToString() + "." + (500 * steps).ToString() + ".png", img);
+                }
+            }
+        }
+    }
+
     public void ExitApp()
     {
         Application.Quit();
