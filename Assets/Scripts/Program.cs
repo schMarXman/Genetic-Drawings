@@ -329,7 +329,7 @@ public class Program : MonoBehaviour
                 }
             }
 
-            System.IO.File.WriteAllText("C:\\temp\\" + (500 * steps).ToString() + ".txt", str.ToString());
+            System.IO.File.WriteAllText("C:\\tmp\\" + (500 * steps).ToString() + ".txt", str.ToString());
         }
     }
 
