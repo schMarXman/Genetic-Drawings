@@ -62,8 +62,8 @@ public class GeneticAlgorithm
                 // TwoPoint
                 return TwopointCrossover(indiv1, indiv2);
             case 3:
-                // Shuffle
-                return FLatCrossover(indiv1, indiv2);
+                return RandomRespectfulCrossover(indiv1, indiv2);
+            
         }
     }
 
@@ -88,7 +88,9 @@ public class GeneticAlgorithm
     private static Individual OnepointCrossover(Individual indiv1, Individual indiv2)
     {
         Individual newSol = new Individual();
+
         int crossoverpoint = UnityEngine.Random.Range(0, indiv1.GetSize() - 1);
+
 
         for (int i = 0; i < indiv1.GetSize(); i++)
         {   // Crossover 1-Point            
@@ -101,8 +103,11 @@ public class GeneticAlgorithm
     private static Individual TwopointCrossover(Individual indiv1, Individual indiv2)
     {
         Individual newSol = new Individual();
+
+
         int crossoverpoint1 = UnityEngine.Random.Range(0, indiv1.GetSize() - 1);
         int crossoverpoint2 = UnityEngine.Random.Range(0, indiv1.GetSize() - 1);
+
 
         for (int i = 0; i < indiv1.GetSize(); i++)
         {   // Crossover 2-Point
@@ -119,32 +124,58 @@ public class GeneticAlgorithm
         return newSol;
     }
 
-    private static Individual FLatCrossover(Individual indiv1, Individual indiv2)
+    private static Individual kpointCrossover(Individual indiv1, Individual indiv2,int k)
     {
-        Individual newSol = new Individual();        
-        for (int i = 0; i < indiv1.GetSize(); i++)
-        {
-            // Flat crossover
-            float h1, h2 = 0;
-            float junk;
-            Color.RGBToHSV(indiv1.GetGene(i), out junk, out junk, out h1);
-            Color.RGBToHSV(indiv2.GetGene(i), out junk, out junk, out h2);
+        int points[]= new int[k-1];
+        Individual newSol = new Individual();
+        for (int j = 0; j < k;j++){
+            points[j]= UnityEngine.Random.Range(0, indiv1.GetSize() - 1);
+        }
+        points.OrderBy(x => x);        
 
-            if (UnityEngine.Random.value <= UniformRate)
-            {
-                if (h1 < h2)
-                    newSol.SetGene(i, indiv1.GetGene(i));
-                else
-                    newSol.SetGene(i, indiv2.GetGene(i));
+        for (int i = 0; i < indiv1.GetSize(); i++)
+        {   // Crossover k-Point          
+            for(int j = 0; j < k; j++){
+                if(j == k-1){
+                    if(i < points[j]){
+                        if(i%2 == 0) newSol.SetGene(i, indiv1.GetGene(i));
+                            else newSol.SetGene(i, indiv2.GetGene(i));
+                    }
+                }else if(i < points[j] && i < points[j+1]){
+                    if(i%2 == 0) newSol.SetGene(i, indiv1.GetGene(i));
+                        else newSol.SetGene(i, indiv2.GetGene(i));
+                }                 
             }
-            else { 
-                if (h1 > h2)
-                    newSol.SetGene(i, indiv1.GetGene(i));
-                else
-                    newSol.SetGene(i, indiv2.GetGene(i));
-            }            
         }
         return newSol;
+    }
+
+    private static Individual RandomRespectfulCrossover(Individual indiv1, Individual indiv2)
+    {
+        Individual child = new Individual();
+        //Without creating similarity vector
+        for (int i = 0; i < indiv1.GetSize(); i++)
+        {
+            Color32 gene1 = indiv1.GetGene(i);
+
+            if (gene1.Equals(indiv2.GetGene(i)))
+            {
+                if (gene1.Equals(new Color32(255, 255, 255, 255)))
+                {
+                    child.SetGene(i, new Color32(255, 255, 255, 255));
+                }
+                else
+                {
+                    child.SetGene(i, new Color32(0, 0, 0, 255));
+                }
+            }
+            else
+            {
+                child.SetGene(i, Random.value > 0.5f ? new Color32(255, 255, 255, 255) : new Color32(0, 0, 0, 255));
+            }
+        }
+
+        return child;
     }
 
     private static void Mutate(Individual indiv)
@@ -188,7 +219,6 @@ public class GeneticAlgorithm
         Individual fittest = tournament.GetFittest();
         return fittest;
     }
-
     private static Individual SelectViaRoulette(Population pop)
     {
         int pickAt = Random.Range(0, GetFitnessSum(pop));
