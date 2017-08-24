@@ -9,7 +9,11 @@ public class UIController : MonoBehaviour
 {
     public static UIController Instance;
 
-    public InputField PopInput, UniRateInput, MutRateInput, TournamentSizeInput, GenStepInput, PopDisplayInput;
+    public InputField PopInput, UniRateInput, MutRateInput, TournamentSizeInput, GenStepInput, PopDisplayInput, KInputField;
+
+    public VerticalLayoutGroup ControlPaneLayoutGroup;
+
+    public Dropdown CrossoverDropdown;
 
     public GameObject PopulationView;
 
@@ -43,7 +47,19 @@ public class UIController : MonoBehaviour
         PopDisplayInput.text = string.Empty + Program.Instance.PopulationDisplayAmount;
         PopDisplayInput.onValueChanged.AddListener(SetPopulationDisplayAmount);
 
+        KInputField.text = string.Empty + GeneticAlgorithm.K;
+        KInputField.onValueChanged.AddListener(SetK);
+
+        KInputField.transform.parent.gameObject.SetActive(false);
+        RefreshControlPanel();
+
         SwitchPopulationView();
+    }
+
+    public void RefreshControlPanel()
+    {
+        ControlPaneLayoutGroup.enabled = false;
+        ControlPaneLayoutGroup.enabled = true;
     }
 
     public void SwitchPopulationView()
@@ -103,6 +119,24 @@ public class UIController : MonoBehaviour
         Program.Instance.GenStepSize = size;
     }
 
+    public void SetK(int k)
+    {
+        k = Mathf.Clamp(k, 2, FitnessCalculator.Solution.Length);
+
+        KInputField.text = string.Empty + k;
+
+        GeneticAlgorithm.K = k;
+    }
+
+    public void SetK(string k)
+    {
+        int val;
+        if (int.TryParse(k, out val))
+        {
+            SetK(val);
+        }
+    }
+
     public void SetPopulationSize(string size)
     {
         int val;
@@ -157,6 +191,20 @@ public class UIController : MonoBehaviour
         Program.Instance.PopulationDisplayAmount = amount;
 
         Program.Instance.ShowCurrentPopulation(amount);
+    }
+
+    public void CrossoverDropdownChanged()
+    {
+        if (CrossoverDropdown.value == 2)
+        {
+            KInputField.transform.parent.gameObject.SetActive(true);
+        }
+        else
+        {
+            KInputField.transform.parent.gameObject.SetActive(false);
+        }
+
+        RefreshControlPanel();
     }
 
     public void SetPopulationDisplayAmount(string amount)

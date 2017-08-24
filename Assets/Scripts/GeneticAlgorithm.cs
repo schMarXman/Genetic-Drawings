@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
@@ -12,6 +13,7 @@ public class GeneticAlgorithm
     public static double MutationRate = 0.001;
     public static int TournamentSize = 5;
     public static bool Elitism = true;
+    public static int K = 2;
 
     public static Population EvolvePopulation(Population pop, int selection, int crossover)
     {
@@ -59,11 +61,11 @@ public class GeneticAlgorithm
                 // OnePoint
                 return OnepointCrossover(indiv1, indiv2);
             case 2:
-                // TwoPoint
-                return TwopointCrossover(indiv1, indiv2);
+                // KPoint
+                return kpointCrossover(indiv1, indiv2, K);
             case 3:
                 return RandomRespectfulCrossover(indiv1, indiv2);
-            
+
         }
     }
 
@@ -124,27 +126,33 @@ public class GeneticAlgorithm
         return newSol;
     }
 
-    private static Individual kpointCrossover(Individual indiv1, Individual indiv2,int k)
+    private static Individual kpointCrossover(Individual indiv1, Individual indiv2, int k)
     {
-        int points[]= new int[k-1];
+        int[] points = new int[k];
         Individual newSol = new Individual();
-        for (int j = 0; j < k;j++){
-            points[j]= UnityEngine.Random.Range(0, indiv1.GetSize() - 1);
+        for (int j = 0; j < k; j++)
+        {
+            points[j] = UnityEngine.Random.Range(0, indiv1.GetSize() - 1);
         }
-        points.OrderBy(x => x);        
+        points = points.OrderBy(x => x).ToArray();
 
         for (int i = 0; i < indiv1.GetSize(); i++)
         {   // Crossover k-Point          
-            for(int j = 0; j < k; j++){
-                if(j == k-1){
-                    if(i < points[j]){
-                        if(i%2 == 0) newSol.SetGene(i, indiv1.GetGene(i));
-                            else newSol.SetGene(i, indiv2.GetGene(i));
-                    }
-                }else if(i < points[j] && i < points[j+1]){
-                    if(i%2 == 0) newSol.SetGene(i, indiv1.GetGene(i));
+            for (int j = 0; j < k; j++)
+            {
+                if (j == k - 1)
+                {
+                    if (i < points[j])
+                    {
+                        if (i % 2 == 0) newSol.SetGene(i, indiv1.GetGene(i));
                         else newSol.SetGene(i, indiv2.GetGene(i));
-                }                 
+                    }
+                }
+                else if (i < points[j] && i < points[j + 1])
+                {
+                    if (i % 2 == 0) newSol.SetGene(i, indiv1.GetGene(i));
+                    else newSol.SetGene(i, indiv2.GetGene(i));
+                }
             }
         }
         return newSol;
