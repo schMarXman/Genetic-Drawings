@@ -55,8 +55,15 @@ public class Population
         mIndividual[index] = indiv;
     }
 
-    public Population OrderByFitness()
+    public Population OrderByFitness(bool descending = false)
     {
-        return new Population(mIndividual.OrderBy(x => x.GetFitness()).ToArray());
+        if (descending)
+        {
+            return new Population(mIndividual.OrderBy(x => x.GetFitness()).Reverse().ToArray());
+        }
+        else
+        {
+            return new Population(mIndividual.OrderBy(x => x.GetFitness()).ToArray());
+        }
     }
 }
