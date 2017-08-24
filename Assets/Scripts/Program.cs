@@ -61,6 +61,8 @@ public class Program : MonoBehaviour
         newTex.SetPixels32(colors);
         mDrawSprite.sprite = Sprite.Create(newTex, TestSprite.sprite.rect, new Vector2(0.5f, 0.5f));
 
+        mDrawSprite.sprite.texture.filterMode = FilterMode.Point;
+
         mDrawSprite.sprite.texture.Apply();
 
         Individual.DefaultGeneLength = colors.Length;
