@@ -98,7 +98,7 @@ public class Program : MonoBehaviour
             StopCoroutine(mEvoCoroutine);
             mEvoCoroutine = null;
 
-            ShowPopulation(PopulationDisplayAmount);
+            ShowPopulation(mPopulation, PopulationDisplayAmount);
         }
     }
 
@@ -121,16 +121,16 @@ public class Program : MonoBehaviour
             var fittest = mPopulation.GetFittest();
             SetColors(fittest.GetGenes());
 
-            ShowPopulation(PopulationDisplayAmount);
+            ShowPopulation(mPopulation, PopulationDisplayAmount);
 
             CurrentFitnessLabel.text = "Fitness: " + fittest.GetFitness();
             GenerationLabel.text = "Generation: " + mGenerationCount;
         }
     }
 
-    public void ShowPopulation(int amount)
+    public void ShowPopulation(Population pop, int amount)
     {
-        if (UIController.Instance.PopulationView.activeSelf && mPopulation != null)
+        if (UIController.Instance.PopulationView.activeSelf && pop != null)
         {
             if (mPopulationPrefabs.Count != 0)
             {
@@ -150,7 +150,7 @@ public class Program : MonoBehaviour
                 image.sprite = CreateSprite();
                 image.transform.SetParent(PopDrawerContentParent);
 
-                var indi = mPopulation.GetIndividual(i);
+                var indi = pop.GetIndividual(i);
 
                 text.text = "#" + (i + 1) + " F: " + indi.GetFitness();
 
@@ -161,6 +161,12 @@ public class Program : MonoBehaviour
                 mPopulationPrefabs.Add(image.gameObject);
             }
         }
+    }
+
+    public void ShowOrderedPopulation()
+    {
+        var orderedPop = mPopulation.OrderByFitness();
+        ShowPopulation(orderedPop, PopulationDisplayAmount);
     }
 
     public void SelectSourceImage(Image image)
