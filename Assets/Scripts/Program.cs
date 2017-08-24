@@ -1,5 +1,7 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Text;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -16,7 +18,7 @@ public class Program : MonoBehaviour
     //private SpriteRenderer mDrawSprite;
     public Image mDrawSprite;
 
-    public Dropdown crossoverDropdown;
+    public Dropdown crossoverDropdown, selectionDropdown;
 
     private Population mPopulation;
 
@@ -133,7 +135,7 @@ public class Program : MonoBehaviour
             mGenerationCount = 0;
 
             //Binary crossover method
-            if (crossoverDropdown.value == 4 )
+            if (crossoverDropdown.value == 3 )
             {
                 Color32[] blackAndWhite = new Color32[colors.Length];
                 for (int i = 0; i < colors.Length; i++)
@@ -164,7 +166,7 @@ public class Program : MonoBehaviour
             StopCoroutine(mEvoCoroutine);
             mEvoCoroutine = null;
 
-            ShowPopulation(PopulationDisplayAmount);
+            ShowPopulation(mPopulation, PopulationDisplayAmount);
         }
     }
 
@@ -179,7 +181,7 @@ public class Program : MonoBehaviour
 
             for (int i = 0; i < GenStepSize; i++)
             {
-                mPopulation = GeneticAlgorithm.EvolvePopulation(mPopulation, crossoverDropdown.value);
+                mPopulation = GeneticAlgorithm.EvolvePopulation(mPopulation, selectionDropdown.value, crossoverDropdown.value);
             }
 
             mGenerationCount += GenStepSize;
@@ -187,16 +189,21 @@ public class Program : MonoBehaviour
             var fittest = mPopulation.GetFittest();
             SetColors(fittest.GetGenes());
 
-            ShowPopulation(PopulationDisplayAmount);
+            ShowPopulation(mPopulation, PopulationDisplayAmount);
 
             CurrentFitnessLabel.text = "Fitness: " + fittest.GetFitness();
             GenerationLabel.text = "Generation: " + mGenerationCount;
         }
     }
 
-    public void ShowPopulation(int amount)
+    public void ShowCurrentPopulation(int amount)
     {
-        if (UIController.Instance.PopulationView.activeSelf && mPopulation != null)
+        ShowPopulation(mPopulation, PopulationDisplayAmount);
+    }
+
+    public void ShowPopulation(Population pop, int amount)
+    {
+        if (UIController.Instance.PopulationView.activeSelf && pop != null)
         {
             if (mPopulationPrefabs.Count != 0)
             {
@@ -216,7 +223,7 @@ public class Program : MonoBehaviour
                 image.sprite = CreateSprite();
                 image.transform.SetParent(PopDrawerContentParent);
 
-                var indi = mPopulation.GetIndividual(i);
+                var indi = pop.GetIndividual(i);
 
                 text.text = "#" + (i + 1) + " F: " + indi.GetFitness();
 
@@ -226,6 +233,15 @@ public class Program : MonoBehaviour
 
                 mPopulationPrefabs.Add(image.gameObject);
             }
+        }
+    }
+
+    public void ShowOrderedPopulation()
+    {
+        if (mPopulation != null)
+        {
+            var orderedPop = mPopulation.OrderByFitness(true);
+            ShowPopulation(orderedPop, PopulationDisplayAmount);
         }
     }
 
@@ -280,6 +296,43 @@ public class Program : MonoBehaviour
         }
     }
 
+    public void TestSuite()
+    {
+
+        for (int steps = 1; steps < 3; steps++)
+        {
+            GenStepSize = 500 * steps;
+            StringBuilder str = new StringBuilder();
+            // selections
+            for (int i = 0; i < 3; i++)
+            {
+                selectionDropdown.value = i;
+                // crossover
+                for (int j = 0; j < 5; j++)
+                {
+                    int avg = 0;
+
+                    for (int av = 0; av < 3; av++)
+                    {
+                        crossoverDropdown.value = j;
+                        Reset();
+                        StepForward();
+                        avg += mPopulation.GetFittest().GetFitness();
+                    }
+
+                    avg /= 3;
+
+                    str.Append((500*steps).ToString() + " " + i.ToString() + " " + j.ToString() + " " + avg.ToString());
+                    str.Append(Environment.NewLine);
+                    var img = mDrawSprite.sprite.texture.EncodeToPNG();
+                    System.IO.File.WriteAllBytes("C:\\tmp\\" + i.ToString() + "." + j.ToString() + "." + (500 * steps).ToString() + ".png", img);
+                }
+            }
+
+            System.IO.File.WriteAllText("C:\\temp\\" + (500 * steps).ToString() + ".txt", str.ToString());
+        }
+    }
+
     public void ExitApp()
     {
         Application.Quit();
@@ -305,7 +358,7 @@ public class Program : MonoBehaviour
             CurrentFitnessLabel.text = "Fitness: " + fitness;
             GenerationLabel.text = "Generation: " + mGenerationCount;
 
-            mPopulation = GeneticAlgorithm.EvolvePopulation(mPopulation, crossoverDropdown.value);
+            mPopulation = GeneticAlgorithm.EvolvePopulation(mPopulation, selectionDropdown.value, crossoverDropdown.value);
 
             SetColors(fittest.GetGenes());
             //}
@@ -327,7 +380,7 @@ public class Program : MonoBehaviour
 
         for (int i = 0; i < 200; i++)
         {
-            colors[Random.Range(0, colors.Length - 1)] = Color.black;
+            colors[UnityEngine.Random.Range(0, colors.Length - 1)] = Color.black;
         }
 
         mDrawSprite.sprite.texture.SetPixels32(colors);

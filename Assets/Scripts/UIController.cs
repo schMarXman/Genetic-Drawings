@@ -58,7 +58,7 @@ public class UIController : MonoBehaviour
 
                 if (!Program.Instance.EvolutionRunning())
                 {
-                    Program.Instance.ShowPopulation(Program.Instance.PopulationDisplayAmount);
+                    Program.Instance.ShowCurrentPopulation(Program.Instance.PopulationDisplayAmount);
                 }
                 break;
         }
@@ -156,7 +156,7 @@ public class UIController : MonoBehaviour
 
         Program.Instance.PopulationDisplayAmount = amount;
 
-        Program.Instance.ShowPopulation(amount);
+        Program.Instance.ShowCurrentPopulation(amount);
     }
 
     public void SetPopulationDisplayAmount(string amount)

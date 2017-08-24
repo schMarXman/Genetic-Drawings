@@ -13,7 +13,7 @@ public class GeneticAlgorithm
     public static int TournamentSize = 5;
     public static bool Elitism = true;
 
-    public static Population EvolvePopulation(Population pop, int crossover)
+    public static Population EvolvePopulation(Population pop, int selection, int crossover)
     {
         Population newPopulation = new Population(pop.GetSize(), false);
 
@@ -34,8 +34,8 @@ public class GeneticAlgorithm
 
         for (int i = elitismOffset; i < pop.GetSize(); i++)
         {
-            Individual indiv1 = SelectViaTournament(pop);
-            Individual indiv2 = SelectViaTournament(pop);
+            Individual indiv1 = Select(pop, selection);
+            Individual indiv2 = Select(pop, selection);
             Individual newIndiv = Crossover(indiv1, indiv2, crossover);
             newPopulation.SaveIndividual(i, newIndiv);
         }
@@ -57,23 +57,19 @@ public class GeneticAlgorithm
                 return UniformCrossover(indiv1, indiv2);
             case 1:
                 // OnePoint
-                break;
+                return OnepointCrossover(indiv1, indiv2);
             case 2:
                 // TwoPoint
-                break;
+                return TwopointCrossover(indiv1, indiv2);
             case 3:
-                // Shuffle
-                break;
-            case 4:
                 return RandomRespectfulCrossover(indiv1, indiv2);
+            
         }
-
-        return null;
     }
 
     private static Individual UniformCrossover(Individual indiv1, Individual indiv2)
     {
-        Individual newSol = new Individual();        
+        Individual newSol = new Individual();
         for (int i = 0; i < indiv1.GetSize(); i++)
         {
             // Crossover uniform
@@ -84,7 +80,7 @@ public class GeneticAlgorithm
             else
             {
                 newSol.SetGene(i, indiv2.GetGene(i));
-            }            
+            }
         }
         return newSol;
     }
@@ -92,12 +88,14 @@ public class GeneticAlgorithm
     private static Individual OnepointCrossover(Individual indiv1, Individual indiv2)
     {
         Individual newSol = new Individual();
-        int crossoverpoint = UnityEngine.Random.Range(0,indiv1.GetSize()-1);
+
+        int crossoverpoint = UnityEngine.Random.Range(0, indiv1.GetSize() - 1);
+
 
         for (int i = 0; i < indiv1.GetSize(); i++)
         {   // Crossover 1-Point            
             if (i > crossoverpoint) newSol.SetGene(i, indiv1.GetGene(i));
-                else newSol.SetGene(i, indiv2.GetGene(i));
+            else newSol.SetGene(i, indiv2.GetGene(i));
         }
         return newSol;
     }
@@ -105,19 +103,51 @@ public class GeneticAlgorithm
     private static Individual TwopointCrossover(Individual indiv1, Individual indiv2)
     {
         Individual newSol = new Individual();
-        int crossoverpoint1 = UnityEngine.Random.Range(0,indiv1.GetSize()-1);
-        int crossoverpoint2 = UnityEngine.Random.Range(0,indiv1.GetSize()-1);
+
+
+        int crossoverpoint1 = UnityEngine.Random.Range(0, indiv1.GetSize() - 1);
+        int crossoverpoint2 = UnityEngine.Random.Range(0, indiv1.GetSize() - 1);
+
 
         for (int i = 0; i < indiv1.GetSize(); i++)
         {   // Crossover 2-Point
-            if(crossoverpoint1 > crossoverpoint2){
+            if (crossoverpoint1 > crossoverpoint2)
+            {
                 int tmp = crossoverpoint1;
                 crossoverpoint1 = crossoverpoint2;
                 crossoverpoint2 = tmp;
-            }            
+            }
             if (i < crossoverpoint1) newSol.SetGene(i, indiv1.GetGene(i));
-                else if (i > crossoverpoint1 && i < crossoverpoint2) newSol.SetGene(i, indiv2.GetGene(i));
-                else if(i>crossoverpoint2) newSol.SetGene(i, indiv1.GetGene(i));
+            else if (i > crossoverpoint1 && i < crossoverpoint2) newSol.SetGene(i, indiv2.GetGene(i));
+            else if (i > crossoverpoint2) newSol.SetGene(i, indiv1.GetGene(i));
+        }
+        return newSol;
+    }
+
+    private static Individual FLatCrossover(Individual indiv1, Individual indiv2)
+    {
+        Individual newSol = new Individual();        
+        for (int i = 0; i < indiv1.GetSize(); i++)
+        {
+            // Flat crossover
+            float h1, h2 = 0;
+            float junk;
+            Color.RGBToHSV(indiv1.GetGene(i), out junk, out junk, out h1);
+            Color.RGBToHSV(indiv2.GetGene(i), out junk, out junk, out h2);
+
+            if (UnityEngine.Random.value <= UniformRate)
+            {
+                if (h1 < h2)
+                    newSol.SetGene(i, indiv1.GetGene(i));
+                else
+                    newSol.SetGene(i, indiv2.GetGene(i));
+            }
+            else { 
+                if (h1 > h2)
+                    newSol.SetGene(i, indiv1.GetGene(i));
+                else
+                    newSol.SetGene(i, indiv2.GetGene(i));
+            }            
         }
         return newSol;
     }
@@ -162,6 +192,23 @@ public class GeneticAlgorithm
         }
     }
 
+    private static Individual Select(Population pop, int selection)
+    {
+        switch (selection)
+        {
+            default:
+            case 0:
+                // tournament
+                return SelectViaTournament(pop);
+            case 1:
+                // roulette
+                return SelectViaRoulette(pop);
+            case 2:
+                // truncate
+                return SelectViaTruncation(pop);
+        }
+    }
+
     private static Individual SelectViaTournament(Population pop)
     {
         Population tournament = new Population(TournamentSize, false);
@@ -174,6 +221,49 @@ public class GeneticAlgorithm
         Individual fittest = tournament.GetFittest();
         return fittest;
     }
+    private static Individual SelectViaRoulette(Population pop)
+    {
+        int pickAt = Random.Range(0, GetFitnessSum(pop));
+        int current = 0;
+        for (int i = 0; i < pop.GetSize(); i++)
+        {
+            var indiv = pop.GetIndividual(i);
+            current += indiv.GetFitness();
+            if (current > pickAt)
+            {
+                return indiv;
+            }
+        }
 
-    
+        return null;
+    }
+
+    private static Individual SelectViaTruncation(Population pop)
+    {
+        Population sortedPop = pop.OrderByFitness();
+
+        //string test = String.Empty;
+        //for (int i = 0; i < sortedPop.GetSize(); i++)
+        //{
+        //    test += sortedPop.GetIndividual(i).GetFitness() + " ";
+        //}
+        //Debug.Log(test);
+
+        int size = sortedPop.GetSize();
+
+        // Selects randomly one of the fittest 30%
+        return sortedPop.GetIndividual(Mathf.RoundToInt(Random.Range(size * 0.7f, size - 1)));
+    }
+
+    private static int GetFitnessSum(Population pop)
+    {
+        int fSum = 0;
+
+        for (int i = 0; i < pop.GetSize(); i++)
+        {
+            fSum += pop.GetIndividual(i).GetFitness();
+        }
+
+        return fSum;
+    }
 }
