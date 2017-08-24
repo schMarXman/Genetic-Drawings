@@ -63,7 +63,7 @@ public class GeneticAlgorithm
                 return TwopointCrossover(indiv1, indiv2);
             case 3:
                 // Shuffle
-                return null;
+                return FLatCrossover(indiv1, indiv2);
         }
     }
 
@@ -124,13 +124,23 @@ public class GeneticAlgorithm
         for (int i = 0; i < indiv1.GetSize(); i++)
         {
             // Flat crossover
+            float h1, h2 = 0;
+            float junk;
+            Color.RGBToHSV(indiv1.GetGene(i), out junk, out junk, out h1);
+            Color.RGBToHSV(indiv2.GetGene(i), out junk, out junk, out h2);
+
             if (UnityEngine.Random.value <= UniformRate)
             {
-                newSol.SetGene(i, Mathf.Min(indiv1.GetGene(i),indiv2.GetGene(i));
+                if (h1 < h2)
+                    newSol.SetGene(i, indiv1.GetGene(i));
+                else
+                    newSol.SetGene(i, indiv2.GetGene(i));
             }
-            else
-            {
-                newSol.SetGene(i, Mathf.Max(indiv1.GetGene(i),indiv2.GetGene(i));
+            else { 
+                if (h1 > h2)
+                    newSol.SetGene(i, indiv1.GetGene(i));
+                else
+                    newSol.SetGene(i, indiv2.GetGene(i));
             }            
         }
         return newSol;
