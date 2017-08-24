@@ -57,7 +57,7 @@ public class GeneticAlgorithm
                 return UniformCrossover(indiv1, indiv2);
             case 1:
                 // OnePoint
-                return OnepointCrossover(indiv1, indiv2;
+                return OnepointCrossover(indiv1, indiv2);
             case 2:
                 // TwoPoint
                 return TwopointCrossover(indiv1, indiv2);
