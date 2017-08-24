@@ -119,6 +119,24 @@ public class GeneticAlgorithm
         return newSol;
     }
 
+    private static Individual FLatCrossover(Individual indiv1, Individual indiv2)
+    {
+        Individual newSol = new Individual();        
+        for (int i = 0; i < indiv1.GetSize(); i++)
+        {
+            // Flat crossover
+            if (UnityEngine.Random.value <= UniformRate)
+            {
+                newSol.SetGene(i, Mathf.Min(indiv1.GetGene(i),indiv2.GetGene(i));
+            }
+            else
+            {
+                newSol.SetGene(i, Mathf.Max(indiv1.GetGene(i),indiv2.GetGene(i));
+            }            
+        }
+        return newSol;
+    }
+
     private static void Mutate(Individual indiv)
     {
         for (int i = 0; i < indiv.GetSize(); i++)
